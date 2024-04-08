@@ -2,26 +2,19 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 
-#define MAX 10
-#define NUM_THREAD 4
+#define MAX 50
+#define NUM_THREADS 4
 
 typedef struct {
     long graph[MAX][MAX];
-    long visited[MAX];
-    long start_vertex;
+    long edges;
 } Graph;
 
-typedef struct {
-    Graph *g;
-    int thread_id;
-} ThreadArgs;
-
-pthread_t threads[NUM_THREAD];
-pthread_mutex_t mutex;
-
-
-long visited[MAX];
+Graph g1;
+pthread_t threads[NUM_THREADS];
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void createGraph(Graph *g) {
     srand(time(NULL));
@@ -50,56 +43,39 @@ void printGraph(Graph g) {
     }
 }
 
-void dfs(Graph *g, int vertex) {
-    printf("Visiting vertex %d from thread %02ld\n", vertex, pthread_self());
-    visited[vertex] = 1;
-        
-        
-    for (int j = 0; j < MAX; j++) {
-        pthread_mutex_unlock(&mutex);
-        if (g->graph[vertex][j] == 1 && visited[j] == 0)
-            dfs(g, j);
+void* dfs_aux_thread(void* arg) {
+    long thread_id = (long)arg;
+    int start = thread_id * (MAX / NUM_THREADS);
+    int end = start + (MAX / NUM_THREADS);
+
+    for (int i = start; i < end; i++) {
         pthread_mutex_lock(&mutex);
-    }
-
-    pthread_mutex_unlock(&mutex);
-}
-
-void *dfs_thread(void *args) {
-    ThreadArgs *t_args = (ThreadArgs *)args;
-    Graph *g = t_args->g;
-    int thread_id = t_args->thread_id;
-
-    for (int i = thread_id; i < MAX; i += NUM_THREAD) {
-        pthread_mutex_lock(&mutex);
-        if (!g->visited[i]) {
-            dfs(g, i);
-        }
+        printf("Node: %d -------- Thread: %ld\n", i, thread_id);
         pthread_mutex_unlock(&mutex);
     }
 
     pthread_exit(NULL);
 }
 
+void dfs(Graph g) {
+    printf("DFS:\n");
 
-int main() {
-    Graph g1;
-    createGraph(&g1);
-    printGraph(g1);
-
-    pthread_mutex_init(&mutex, NULL);
-    ThreadArgs args[NUM_THREAD];
-    for (int i = 0; i < NUM_THREAD; i++) {
-        args[i].g = &g1;
-        args[i].thread_id = i;
-        pthread_create(&threads[i], NULL, dfs_thread, (void *)&args[i]);
+    for (long i = 0; i < NUM_THREADS; ++i) {
+        pthread_create(&threads[i], NULL, dfs_aux_thread, (void*)i);
     }
 
-    for (int i = 0; i < NUM_THREAD; i++) {
+    for (int i = 0; i < NUM_THREADS; ++i) {
         pthread_join(threads[i], NULL);
     }
+}
 
-    pthread_mutex_destroy(&mutex);
-
+int main() {
+    createGraph(&g1);
+    printGraph(g1);
+    clock_t start = clock();
+    dfs(g1);
+    clock_t end = clock();
+    double execution_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("\nRunTime: %.6f seconds\n", execution_time);
     return 0;
 }

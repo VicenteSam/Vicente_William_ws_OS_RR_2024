@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define MAX 50
+#define MAX 35
 #define NUM_THREADS 4
 
 typedef struct {
@@ -14,7 +14,6 @@ typedef struct {
 
 Graph g1;
 pthread_t threads[NUM_THREADS];
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void createGraph(Graph *g) {
     srand(time(NULL));
@@ -45,21 +44,27 @@ void printGraph(Graph g) {
 
 void* dfs_aux_thread(void* arg) {
     long thread_id = (long)arg;
-    int start = thread_id * (MAX / NUM_THREADS);
-    int end = start + (MAX / NUM_THREADS);
+    int nodes_per_thread = MAX / NUM_THREADS;
+    int start = thread_id * nodes_per_thread;
+    int end = (thread_id + 1) * nodes_per_thread;
+
+    if (thread_id == NUM_THREADS - 1) {
+        end = MAX;
+    }
 
     for (int i = start; i < end; i++) {
-        pthread_mutex_lock(&mutex);
-        printf("Node: %d -------- Thread: %ld\n", i, thread_id);
-        pthread_mutex_unlock(&mutex);
+        printf("Node: %02d -------- Thread: %ld\n", i, thread_id);
     }
 
     pthread_exit(NULL);
 }
 
-void dfs(Graph g) {
-    printf("DFS:\n");
+int main() {
+    createGraph(&g1);
+    printGraph(g1);
+    clock_t start = clock();
 
+    printf("DFS:\n");
     for (long i = 0; i < NUM_THREADS; ++i) {
         pthread_create(&threads[i], NULL, dfs_aux_thread, (void*)i);
     }
@@ -67,15 +72,10 @@ void dfs(Graph g) {
     for (int i = 0; i < NUM_THREADS; ++i) {
         pthread_join(threads[i], NULL);
     }
-}
 
-int main() {
-    createGraph(&g1);
-    printGraph(g1);
-    clock_t start = clock();
-    dfs(g1);
     clock_t end = clock();
     double execution_time = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("\nRunTime: %.6f seconds\n", execution_time);
+
     return 0;
 }

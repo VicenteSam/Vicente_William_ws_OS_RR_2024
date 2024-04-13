@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX 50
+#define MAX 35
 
 typedef struct {
     long graph[MAX][MAX];

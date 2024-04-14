@@ -38,7 +38,7 @@ void printGraph() {
     }
 }
 
-void* dfs_aux_thread(void* arg) {
+void* dfs_aux_thread(void* arg) {                                               // threads routine where each thread has a node range
     long thread_id = (long)arg;
     int nodes_per_thread = MAX / NUM_THREADS;
     int start = thread_id * nodes_per_thread;

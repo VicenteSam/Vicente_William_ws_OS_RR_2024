@@ -34,7 +34,7 @@ void printGraph() {
     }
 }
 
-void dfs_aux(int vertex) {
+void dfs_aux(int vertex) {                                                         //  graph explorer marking nodes as visited
     printf("%d ", vertex);
     visited[vertex] = 1;
         
@@ -44,7 +44,7 @@ void dfs_aux(int vertex) {
     }
 }
 
-void dfs(int orig) {
+void dfs(int orig) {                                                               //  initializing initial point
     printf("DFS:\n");
     for (int j = 0; j < MAX; j++)
         visited[j] = 0;

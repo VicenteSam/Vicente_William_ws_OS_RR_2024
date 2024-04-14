@@ -7,29 +7,25 @@
 #define MAX 35
 #define NUM_THREADS 4
 
-typedef struct {
-    long graph[MAX][MAX];
-    long edges;
-} Graph;
-
-Graph g1;
+long graph[MAX][MAX];
+long visited[MAX];
 pthread_t threads[NUM_THREADS];
 
-void createGraph(Graph *g) {
+void createGraph() {
     srand(time(NULL));
     for (int i = 0; i < MAX; i++) {
         for (int j = 0; j < MAX; j++) {
             if (i != j) {
-                g->graph[i][j] = rand() % 2;
-                g->graph[j][i] = g->graph[i][j];
+                graph[i][j] = rand() % 2;
+                graph[j][i] = graph[i][j];
             } else {
-                g->graph[i][j] = 0;
+                graph[i][j] = 0;
             }
         }
     }
 }
 
-void printGraph(Graph g) {
+void printGraph() {
     printf("   ");
     for (int i = 0; i < MAX; i++)
         printf("%3d", i);
@@ -37,7 +33,7 @@ void printGraph(Graph g) {
     for (int i = 0; i < MAX; i++) {
         printf("%3d", i);
         for (int j = 0; j < MAX; j++)
-            printf("%3ld", g.graph[i][j]);
+            printf("%3ld", graph[i][j]);
         printf("\n");
     }
 }
@@ -60,8 +56,8 @@ void* dfs_aux_thread(void* arg) {
 }
 
 int main() {
-    createGraph(&g1);
-    printGraph(g1);
+    createGraph();
+    printGraph();
     clock_t start = clock();
 
     printf("DFS:\n");

@@ -36,8 +36,7 @@ void printGraph() {
 
 void dfs_aux(int vertex) {
     printf("%d ", vertex);
-    if (!visited[vertex])
-        visited[vertex] = 1;
+    visited[vertex] = 1;
         
     for (int j = 0; j < MAX; j++) {
         if (graph[vertex][j] == 1 && visited[j] == 0)

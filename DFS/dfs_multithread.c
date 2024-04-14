@@ -62,11 +62,16 @@ int main() {
 
     printf("DFS:\n");
     for (long i = 0; i < NUM_THREADS; ++i) {
-        pthread_create(&threads[i], NULL, dfs_aux_thread, (void*)i);
+        if (pthread_create(&threads[i], NULL, dfs_aux_thread, (void*)i) != 0){
+            printf("Failed to create thread");
+            return 1;
+        }
     }
 
     for (int i = 0; i < NUM_THREADS; ++i) {
-        pthread_join(threads[i], NULL);
+        if (pthread_join(threads[i], NULL) != 0){
+            return 2;
+        }
     }
 
     clock_t end = clock();

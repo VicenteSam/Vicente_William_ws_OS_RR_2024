@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define MAX 35
+#define MAX 30
 #define NUM_THREADS 4
 
 long graph[MAX][MAX];

@@ -27,6 +27,19 @@ void createGraph() {
     }
 }
 
+void printGraph() {
+    printf("   ");
+    for (int i = 0; i < MAX; i++)
+        printf("%3d", i);
+    printf("\n");
+    for (int i = 0; i < MAX; i++) {
+        printf("%3d", i);
+        for (int j = 0; j < MAX; j++)
+            printf("%3ld", graph[i][j]);
+        printf("\n");
+    }
+}
+
 void* dfs(void* arg) {
     long thread_id = (long)arg;
     Stack* stack = createStack();
@@ -61,6 +74,7 @@ void* dfs(void* arg) {
 
 int main() {
     createGraph();
+    printGraph();
     clock_t start = clock();
 
     printf("DFS:\n");

@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX 35
+#define MAX 10
 
 long graph[MAX][MAX];
 long visited[MAX];
+int cont = 0;
 
 void createGraph() {
     srand(time(NULL));
@@ -32,11 +33,12 @@ void printGraph() {
             printf("%3ld", graph[i][j]);
         printf("\n");
     }
+    printf("\nDFS:\n");
 }
 
-void dfs_aux(int vertex) {                                                         //  graph explorer marking nodes as visited
+void dfs_aux(int vertex) {
     printf("%d ", vertex);
-    visited[vertex] = 1;
+    visited[vertex] = ++cont;
         
     for (int j = 0; j < MAX; j++) {
         if (graph[vertex][j] == 1 && visited[j] == 0)
@@ -44,11 +46,16 @@ void dfs_aux(int vertex) {                                                      
     }
 }
 
-void dfs(int orig) {                                                               //  initializing initial point
-    printf("DFS:\n");
+void dfs(int orig) {
+    cont = 0;
+    
     for (int j = 0; j < MAX; j++)
         visited[j] = 0;
     dfs_aux(orig);
+    printf("\n");
+    for(int j=0; j< MAX; j++)
+        printf("%ld ", visited[j]);
+    
 }
 
 int main() {

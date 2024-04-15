@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
-#include <unistd.h>
+#include <stdbool.h>
+#include "stack.h"
 
-#define MAX 30
+#define MAX 20
 #define NUM_THREADS 4
 
 long graph[MAX][MAX];
-long visited[MAX];
+bool visited[MAX] = {false};
 pthread_t threads[NUM_THREADS];
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void createGraph() {
     srand(time(NULL));
@@ -25,44 +27,45 @@ void createGraph() {
     }
 }
 
-void printGraph() {
-    printf("   ");
-    for (int i = 0; i < MAX; i++)
-        printf("%3d", i);
-    printf("\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%3d", i);
-        for (int j = 0; j < MAX; j++)
-            printf("%3ld", graph[i][j]);
-        printf("\n");
-    }
-}
-
-void* dfs_aux_thread(void* arg) {                                               // threads routine where each thread has a node range
+void* dfs(void* arg) {
     long thread_id = (long)arg;
-    int nodes_per_thread = MAX / NUM_THREADS;
-    int start = thread_id * nodes_per_thread;
-    int end = (thread_id + 1) * nodes_per_thread;
+    Stack* stack = createStack();
 
+    int start = thread_id * (MAX / NUM_THREADS);
+    int end = (thread_id + 1) * (MAX / NUM_THREADS);
     if (thread_id == NUM_THREADS - 1) {
         end = MAX;
     }
 
     for (int i = start; i < end; i++) {
-        printf("Node: %02d -------- Thread: %ld\n", i, thread_id);
+        if (!visited[i]) {
+            push(stack, i);
+            while (!stackIsEmpty(stack)) {
+                int node = pop(stack);
+                if (!visited[node]) {
+                    visited[node] = true;
+                    printf("Thread %ld is visiting node: %d\n", thread_id, node);
+                    for (int j = 0; j < MAX; j++) {
+                        if (graph[node][j] && !visited[j]) {
+                            push(stack, j);
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    destroyStack(&stack);
     pthread_exit(NULL);
 }
 
 int main() {
     createGraph();
-    printGraph();
     clock_t start = clock();
 
     printf("DFS:\n");
     for (long i = 0; i < NUM_THREADS; ++i) {
-        if (pthread_create(&threads[i], NULL, dfs_aux_thread, (void*)i) != 0){
+        if (pthread_create(&threads[i], NULL, dfs, (void*)i) != 0){
             printf("Failed to create thread");
             return 1;
         }

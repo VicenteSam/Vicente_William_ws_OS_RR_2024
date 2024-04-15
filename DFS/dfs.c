@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX 30
+#define MAX 20
 
 long graph[MAX][MAX];
 long visited[MAX];

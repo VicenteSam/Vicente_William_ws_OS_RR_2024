@@ -99,7 +99,8 @@ int main() {
     clock_t end = clock();
     double execution_time = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("\nRunTime: %.6f seconds\n", execution_time);
-    
+
+    pthread_mutex_destroy(&mutex);
     pthread_exit(NULL);
     
     return 0;

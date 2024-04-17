@@ -1,40 +1,36 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include "stack.h"
 
-#define MAX 20
+#define MAX 10
 #define NUM_THREADS 4
 
-long graph[MAX][MAX];
+long graph[MAX][MAX] = {
+    {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+    {1, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+    {1, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+    {0, 1, 0, 0, 0, 1, 0, 0, 0, 0},
+    {0, 0, 1, 0, 0, 1, 1, 0, 0, 0},
+    {0, 0, 0, 1, 1, 0, 0, 1, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+    {0, 0, 0, 0, 0, 1, 0, 0, 1, 1},
+    {0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
+    {0, 0, 0, 0, 0, 0, 0, 1, 1, 0}
+};
+
 bool visited[MAX] = {false};
 pthread_t threads[NUM_THREADS];
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void createGraph() {
-    srand(time(NULL));
-    for (int i = 0; i < MAX; i++) {
-        for (int j = 0; j < MAX; j++) {
-            if (i != j) {
-                graph[i][j] = rand() % 2;
-                graph[j][i] = graph[i][j];
-            } else {
-                graph[i][j] = 0;
-            }
-        }
-    }
-}
-
 void printGraph() {
     printf("   ");
-    for (int i = 0; i < MAX; i++)
+    for (int i = 0; i < 10; i++)
         printf("%3d", i);
     printf("\n");
-    for (int i = 0; i < MAX; i++) {
+    for (int i = 0; i < 10; i++) {
         printf("%3d", i);
-        for (int j = 0; j < MAX; j++)
+        for (int j = 0; j < 10; j++)
             printf("%3ld", graph[i][j]);
         printf("\n");
     }
@@ -44,36 +40,45 @@ void* dfs(void* arg) {
     long thread_id = (long)arg;
     Stack* stack = createStack();
 
-    int start = thread_id * (MAX / NUM_THREADS);
-    int end = (thread_id + 1) * (MAX / NUM_THREADS);
+    int start = thread_id * (10 / NUM_THREADS);
+    int end = (thread_id + 1) * (10 / NUM_THREADS);
     if (thread_id == NUM_THREADS - 1) {
-        end = MAX;
+        end = 10;
     }
 
     for (int i = start; i < end; i++) {
         if (!visited[i]) {
-            push(stack, i);
-            while (!stackIsEmpty(stack)) {
-                int node = pop(stack);
-                if (!visited[node]) {
-                    visited[node] = true;
+            pthread_mutex_lock(&mutex);
+            if (!visited[i]) {
+                push(stack, i);
+                visited[i] = true;
+                pthread_mutex_unlock(&mutex);
+
+                while (!stackIsEmpty(stack)) {
+                    int node = pop(stack);
                     printf("Thread %ld is visiting node: %d\n", thread_id, node);
-                    for (int j = 0; j < MAX; j++) {
-                        if (graph[node][j] && !visited[j]) {
-                            push(stack, j);
+                    for (int j = 0; j < 10; j++) {
+                        if (graph[node][j] != 0 && !visited[j]) {
+                            pthread_mutex_lock(&mutex);
+                            if (!visited[j]) {
+                                push(stack, j);
+                                visited[j] = true;
+                            }
+                            pthread_mutex_unlock(&mutex);
                         }
                     }
                 }
+            } else {
+                pthread_mutex_unlock(&mutex);
             }
         }
     }
 
     destroyStack(&stack);
-    pthread_exit(NULL);
+    
 }
 
 int main() {
-    createGraph();
     printGraph();
     clock_t start = clock();
 
@@ -94,6 +99,8 @@ int main() {
     clock_t end = clock();
     double execution_time = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("\nRunTime: %.6f seconds\n", execution_time);
-
+    
+    pthread_exit(NULL);
+    
     return 0;
 }

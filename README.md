@@ -3,7 +3,7 @@
 
 ## Graphs and DFS
 <p align="center">
-![Depth-First-Search](https://github.com/VicenteSam/Vicente_William_ws_OS_RR_2024/assets/141889498/60fd50d4-a954-4eff-ba56-f5f011b50e58)
+      ![Depth-First-Search](https://github.com/VicenteSam/Vicente_William_ws_OS_RR_2024/assets/141889498/60fd50d4-a954-4eff-ba56-f5f011b50e58)
 </p>
 
 ## Topics

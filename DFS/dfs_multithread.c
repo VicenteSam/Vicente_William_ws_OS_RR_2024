@@ -58,7 +58,7 @@ void* dfs(void* arg) {
 
         while (!stackIsEmpty(stack)) {
             int node = pop(stack);
-            printf("Thread %ld is visiting node: %d\n", thread_id, node);
+            printf("Thread %ld is visiting node: %d\n", thread_id, node+1);
             for (int j = 0; j < MAX; j++) {
                 if (graph[node][j] != 0 && !visited[j]) {
                     pthread_mutex_lock(&mutex);

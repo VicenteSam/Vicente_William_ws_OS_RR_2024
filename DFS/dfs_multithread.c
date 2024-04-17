@@ -73,9 +73,8 @@ void* dfs(void* arg) {
             }
         }
     }
-
-    destroyStack(&stack);
     
+    destroyStack(&stack);
 }
 
 int main() {
